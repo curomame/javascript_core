@@ -534,3 +534,45 @@ Function.prototype.apply(thisArg[, argsArray]);
 apply랑 call 메서드는 기능적으로 동일한데,
 call 메서드는 첫 번째 인자를 제외한 나머지 모든 인자들을 호출할 함수의 매개변수로 지정하는 반면,
 apply 메서드는 두 번째 인자를 배열로 받아 그 배열의 요소들을 호출할 함수의 매개변수로 지정한다는 점에서 차이가 있음.
+
+3.2.3 call / apply 메서드의 활용
+- 유사배열객체 array-like object에 배열 메서드를 적용
+
+객체에는 배열 메서드를 직접 적용할 수 없음.
+하지만 키가 0 또는 양의 정수인 프로퍼티가 존재하고, length 프로퍼티 값이 0 또는 양의 정수인 객체,
+즉 배열의 구조와 유사한 객체의 경우(유사배열객체) call 또는 apply 매서드를 활용해서 배열 메서드를 차용할 수 있음.
+
+함수 내부에서 접근할 수 있는 arguments 객체도 유사배열객체이므로 같은 방법으로 사용할 수 있음.
+querySelectorAll, getElementsByClassName 으로 선택한 nodelist도 마찬가지.
+
+ex)
+var obj = {
+0:'a',
+1:'b',
+2:'c',
+length:3
+};
+Array.prototype.push.call(obj, 'd');
+
+var argv = Array.prototype.slice.call(arguments);
+argv.forEach(function (arg){
+console.log(arg)});
+
+단 문자열의 경우 length 프로퍼티가 읽기 전용이라, 원본 문자열에 변경을 가하는 메서드는 에어를 던지고,
+concat 처럼 대상이 반드시 배열이여야 하는 경우에 에러는 나지 않지만 제대로된 결과값이 나오지 않음.
+
+ES6 에서는 유사배열객체 또는 순회 가능한 모든 종류의 데이터 타입을 배열로 전환하는 Array.from 메소드를 새로 도입함.
+=> 배열 형태로 각각 튀어나옴
+
+- 생성자 내부에서 다른 생성자를 호출
+생성자 내부에 다른 생성자와 공통된 내용이 있을 경우 call or apply를 이용해 다른 생성자를 호출하면 간단하게 반복을 줄일 수 있음
+생성자 함수 내부에서 생성자 함수를 호출해 인스턴스의 속성을 정의
+
+- 여러 인수를 묶어 하나의 배열로 전달하고 싶을 때 - apply 활용
+여러개의 인수를 받는 메서드에게 하나의 배열로 인수들을 전달하고 싶을 때는 apply메서드가 좋음.
+Math.max와 Math.min에 아주 좋음.
+ES6 에서는 스프ㅔ드 연산자로 활용해도 괜찮음.
+결국 call apply에서는 this 활용해서 명시적으로 this바인딩 하면서 함수또는 메서드 실행할 수 있지만,
+이로 인해서 this를 예측하기 어려워지는 단점이 있음.
+
+3.2.4 bind 메서드
