@@ -636,3 +636,72 @@ Map.prototype.forEach
 -call,apply = 명시적으로 this지정하고 함수 또는 메서드 호출
 -bind = this 및 함수에 넘길 인수를 일부 지정해서 새로운 함수 제작
 -요소를 순회하면서 콜백함수를 반복호출하는 경우의 일부 메서드는 별도의 this를 인자로 받기도 함.
+
+
+
+ <br>
+**04.콜백함수**
+<br>
+
+
+4.1 콜백 함수란?
+콜백함수는 다른 코드의 인자로 넘겨주는 함수.
+콜백 함수를 넘겨받은 코드는, 이 콜백 함수를 필요에 따라 적절한 시점에 실행
+
+callback = 부르다, 호출하다 call + 뒤돌아오다, 되돌다 back
+되돌아 호출해줘! 라는 말
+어떤 함수를 호출하면서 특정 조건일때 a함수 실행해서 알려줘!
+라는 요청을 보내면
+그 함수가 판단하고 a 스스로 호출하는 것임.
+제어권도 위임함.
+
+4.2 제어권
+
+4.2.1 호출 시점
+scope.setInterval(func, delay[, param1, param2, …]);
+
+scope에는 window객체 혹은 worker의 인스턴스가 들어오는데, 일반적인 브라우저 환경에서는 window생략해서 사용함.
+매개변수로 func, delay받는데 필수며 delay는 ms단위
+나머지 파라미터는 func 실행할때 매개변수로 전달할 인자.
+func에 넘겨준 함수는 매 delay마다 실행되며, 결과로 어떠한 값도 리턴하지 않음
+setInterval 실행하면 내용 자체를 특정할 수 있는 고유 id값이 반환되는데,
+이를 변수에 담은 이유는 반복 실행되는 중간에 종료할수있게끔임.
+clearInterval
+
+4.2.2 인자
+
+Array.prototype.map(vallback[, thisArg])
+callback : function(CurrentValue, index, array)
+
+map 매서드는 메서드의 대상이 되는 배열의 모든 요소들을 처음부터 끝까지 하나씩 꺼내어
+콜백 함수를 반복 호출하고,
+콜백함수의 실행 결과들을 모아 새로운 배열을 만듦.
+(CurrentValue, index, array)
+현재 배열, 인덱스, 결과 배열
+
+이렇듯 콜백함수 제어권 넘길땐, 함수 메서드에 맞는 인자들을 제대로 넘기고 확인해야함.
+
+4.2.3 this
+콜백함수도 함수이기때문에 기본적으로 this가 전역객체 참조하지만, 만약 bind한 경우 그것을 따름.
+
+map함수를 자세히 보면 아래와 비슷
+Array.prototype.map = function (callback, thisArg){
+var amppedArr = [];
+for (var i = 0; i< this.length; i++){
+
+
+^var mappedValue = callback.call(thisArg || window, this[i], i, this);^
+
+
+mappedArr[i] = mappedValue;
+}
+return mappedArr;
+};
+
+this에는 ThisArg값이 있을 경우 그 값을,
+없을 경우 전역 객체를 지정하고
+인자1 - 배열의 i 요소
+인자2 - i
+인자3 - 배열 자체 지정
+하여 호출함.
+
