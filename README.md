@@ -705,3 +705,129 @@ this에는 ThisArg값이 있을 경우 그 값을,
 인자3 - 배열 자체 지정
 하여 호출함.
 
+4.3 콜백 함수는 함수다.
+콜백 함수로 어떤 객체의 메서드를 전달하더라도, 그 메서드는 메서드가 아닌 함수로써 호출됨.
+함수만 가리키게 되면 이전에 말했던것처럼, this가 전역 객체를 바라보게 됨.
+
+결국 뭔가를 부르고 호출하지 않으면 함수는 그 함수자체로 함수라는 말이다.
+
+4.4 콜백 함수 내부의 this에 다른 값 바인딩하기
+객체의 메서드를 콜백 함수로 전달하면 해당 객체를 this로 바라볼 수 없게 된다.
+콜백 함수 내부에서 this가 객체를 바라보게 하고 싶다면?
+별도의 인자로 만들어 넘겨줘도 되지만, 그렇지 않은 경우, this의 제어권도 넘겨주게 되서 사용자가 임의로 변경 불가능.
+그래서 전통적으로는 this를 다른 변수에 담아 콜백 함수로 활용할 함수에서는 this대신 그 변수를 사용하게 하고,
+이를 클로저로 만드는 방식이 많이 사용됨.
+
+1.함수 내부의 this에 다른 값 바인딩 - 전통적
+var obj1 = {
+name : 'obj1',
+func : function () {
+var self = this;
+return function() {
+console.log(self.name)
+}
+}
+
+var callback = obj1.func();
+setTimeout(callback, 1000)
+
+2.콜백 함수 내부에서 this를 사용하지 않는 경우
+var obj1 = {
+name :'obj1',
+func:function (){
+console.log(obj1.name)
+}
+}
+setTimeout(obj1.func, 1000);
+
+3.func함수 재활용
+
+var obj2 = {
+name:'obj2',
+func:obj1.func
+}
+
+var callback2= obj2.func();
+setTime(callback2,1500);
+
+var obj3 = {name:'obj3'};
+var callback3 = obj1.func.call(obj3);
+setTimeout(callback3, 2000);
+
+4.ES5 bind method
+var obj1 = {
+
+name:'obj1',
+func:function () {
+console.log(this.name)
+}
+};
+
+setTimeout(obj1.func.bind(obj1), 1000);
+
+var obj2 = {name:'obj2'};
+setTimeout(obj1.func.bind(obj2),1500);
+
+4.5 콜백 지옥과 비동기 제어
+콜백 지옥은 콜백 함수를 익명 함수로 전달하는 과정이 반복되어 코드의 들여쓰기 수준이 더러워지는 현상이다.
+js에서 흔히 발생하는 문제인데, 주로 이벤트 처리나 서버 통신과 같이 비동기적인 작업을 수행하기 위해 이러한 형태가 자주 등장하는데,
+가독성도 떨어지고 코드 수정도 어려움
+
+비동기 <===> 동기
+동기적인 코드는 현재 실행 중인 코드가 완료된 후에 다음 코드를 실행하는 방식.
+반대로 비동기적인 코드는 현재 실행 중인 코드의 완료 여부와 무관하게 즉시 다음 코드로 넘어감.
+CPU의 계산에 의해 즉시 처리가 가능한 대부분의 코드는 동기적임.
+계산식이 복잡해서 CPU가 계산하는데 시간이 많이 필요한 경우라고 해도 이는 동기적인 코드임.
+반면 사용자의 요청에 의해 특정 시간이 경과되기전 함수의 실행을 보류하거나,
+사용자 개입이 있을때 실행하도록 대기하거나,
+웹브라우저 자체가 아닌 다른 대상에 요청하고 그 응답이 왔을때 함수를 실행하도록 대기하는 등,
+별도의 요청, 실행 대기, 보류 등과 관련된 코드는 비동기적인 코드임.
+
+현대 js는 웹 복잡도 높아지면서 비동기 코드 많아지고 그로인해 콜백지옥이 커지고 있음.
+
+콜백함수 계속해서 쓰게되면 전달되는 순서가 아래 => 위 로 향해서 어색하게 느껴짐
+해결하는 방법중 하나는 모두 기명함수로 변경하는것이 있는데,
+이는 귀찮고 헷갈릴수도 있음.
+
+그래서 ES6에서 promise,generator가 도입되고 es2017에서는 async,await가 도입됨.
+
+new Promise(function (resolve){
+setTimeout(function () {
+var name = '에스프레소';
+console.log(name);
+resolve(name);
+}, 500)
+}).then(function(prevName){
+return new Promise(function(resolve){
+….
+
+이런식으로 진행됨.
+
+new 연산자와 함께 호출한 promise의 인자로 넘겨주는 콜백함수는 호출할때 바로 실행됨.
+내부에 resolve또는 reject가 있으면, 둘 중 하나가 실행되기 전까지 다음 then 또는 오류 구문(catch)로 넘어가지 않음.
+비동기가 완료되어야만 resolve, reject가 되니 비동기 작업의 동기적 표현이 가능해짐.
+
+-Generator
+var addCoffee = function(prevName, name){
+setTimeout(function(){
+coffeeMaker.next(prevName ? prevName + ','+name : name);
+}, 500);
+};
+
+var coffeeGenerator = function* () {
+var espresso = yield addCoffee('', '에스프레소');
+console.log(espresso);
+var americano = yield addCoffee(espresso, '아메리카노');
+…..
+
+};
+var coffeeMaket = coffeeGenerator();
+coffeeMaker.next();
+
+*붙은게 generator임.
+generator함수 실행하면 iterator가 반환되는데, iterator는 next라는 메소드를 가짐
+next 호출하면 generator함수 내부에서 가장 먼저 등장하는 yield에서 함수의 실행을 멈춤.
+이후 다시 next 메서드 호출하면, 앞서 멈췄던 부분부터 시작해서 그다음 yield에서 멈춤.
+즉 비동기 작업이 완료되는 시점마다 next호출해주면 generator가 위에서 아래로 순서대로 진행되는 것임.
+
+=> 이부분 조금 더 봐야할듯
