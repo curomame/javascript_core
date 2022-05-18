@@ -830,4 +830,36 @@ next 호출하면 generator함수 내부에서 가장 먼저 등장하는 yield�
 이후 다시 next 메서드 호출하면, 앞서 멈췄던 부분부터 시작해서 그다음 yield에서 멈춤.
 즉 비동기 작업이 완료되는 시점마다 next호출해주면 generator가 위에서 아래로 순서대로 진행되는 것임.
 
-=> 이부분 조금 더 봐야할듯
+그런데 위에 내용이 어려워서 아래처럼 async/await이 가독성도 좋고 좋은 것 같다.
+
+var addCoffee = function (name) {
+return new Promise(function (resolve){
+	setTimeout(function(){
+resolve(name);
+},500)})}
+
+var coffeeMaker = async function () {
+var coffeeList = '';
+var _addCoffee = async function(name){
+coffeeList += (coffeeList ? ',' : '') + await addCoffee(name)}
+
+await _addCoffee('에스프레소);
+console.log(coffeeList)
+await _addCoffee('아메리카노');
+console.log(coffeeList)
+….
+}
+coffeeMaker();
+
+
+4.6 정리
+콜백 함수는 다른 코드에 인자로 넘겨줌으로써 그 제어권도 함께 넘김
+제어권 넘겨받은 코드는 
+1. 콜백함수 호출 하는 시점 스스로 판단해서 실행
+2. 콜백 함수 호출 시, 넘겨줄 값들 및 순서가 정해져있고, 순서따르지 않고 코딩하면 띠로롱 하고 나옴
+3. 콜백함수 this가 뭘 볼지 정해져 있는 경우도 있어서, 만약 원하지 않는다면 bind 사용하기
+4. 함수에 인자로 메서드 전달해도 결국 함수로 실행됨
+5. 비동기 제어 위해 콜백 함수 사용하다보면 콜백지옥 빠지니, Promise,Generator,async/await 사용해보기
+
+
+//오늘은 양이 좀 적군..
