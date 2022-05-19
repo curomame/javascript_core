@@ -862,4 +862,85 @@ coffeeMaker();
 5. 비동기 제어 위해 콜백 함수 사용하다보면 콜백지옥 빠지니, Promise,Generator,async/await 사용해보기
 
 
-//오늘은 양이 좀 적군..
+ <br>
+**05.클로저**
+<br>
+
+5.1 클로저의 의미 및 원리 이해
+클로저는 여러 함수형 프로그래밍 언어에 등장하는 보편적 특성임.
+MDN - 클로저는 함수와 그 함수가 선언될 당시의 le의 상호관계에 따른 현상
+내부함수에서 외부 변수를 참조하는 경우에 해당
+
+즉, 어떤 ㅎ마수에서 선언한 변수를 참조하는 내부함수에서만 발생하는 현상.
+
+var outer = function () {
+var a =1;
+var inner = function () {
+console.log(++a);
+};
+inner();
+};
+outer();
+
+위 함수의 흐름
+1.[]
+
+2.[전역 컨텍스트]
+
+3.Outer[LE - environmentRecord : {a:1, inner:f} -outerEnvironmentReference : {outer :1}]
+[전역 컨텍스트]
+
+4.Inner[LE - environmentRecord : {a:1=>2, inner:f} -outerEnvironmentReference : {outer :1}]
+Outer[LE - environmentRecord : {a:1=>2, inner:f} -outerEnvironmentReference : {outer :1}]
+[전역 컨텍스트]
+
+5.Outer[LE - environmentRecord : {a:1=>2, inner:f} -outerEnvironmentReference : {outer :1}]
+[전역 컨텍스트]
+
+6.[전역 컨텍스트]
+
+7.[]
+
+하지만 위와 같은 방식은 내부 함수를 재사용 하는것이 불가능
+
+var outer = function () {
+var a =1;
+var inner = function () {
+return ++a;
+};
+return inner;
+};
+var outer2 = outer();
+console.log(outer2());
+console.log(outer2());
+
+위 함수의 흐름
+
+1.[]
+
+2.전역 environmentRecord : { outer : f, outer2:undefined}
+
+3.outer - environmentRecord : {a :1, inner : f} - outerEnvironmentRecord : {outer :f }
+전역 environmentRecord : { outer : f, outer2:undefined}
+
+4.(outer) environmentRecord : {a :1} <- 나머지 부분은 지워짐
+전역 environmentRecord : { outer : f, outer2:undefined}
+
+5.inner - environmentRecord : {} - outerEnvironmentRecord : {a:1 => 2 => 3}
+(outer) environmentRecord : {a :1=> 2 => 3}  
+전역 environmentRecord : { outer : f, outer2:undefined}
+ 
+6.outer {a:3}
+[전역]
+
+7.[]
+
+보통 함수가 끝나면 le가 gc에 들어가게 되는데, 사실 gc는 그 값이 하나도 참조가 되지 않는 경우에만 해당된다.
+outer에서 inner함수를 반환하는 것 자체가, 언젠가 내부 함수가 실행될 것을 암시하기 때문에 그 가능성을 열어두는 것이다.
+위와 같은 것이 일단 클로저의 기본 베이스가 된다는 것이다.
+
+다시 내용을 고치면,
+클로저란 어떤 함수 a에서 선언한 변수 a를 참조하는 내부함수 b를 외부로 전달할 경우 a의 실행 컨텍스트가 종료된 이후에도 변수 a가 사라지지 않는 현상
+
+하지만 여기서도 외부전달이 무조건 return 만을 의미하는 것은 아님
+setinterval 혹은 addeventlistener처럼 handler 함수 내부에서 지역변수를 참조하도록 하는 그런것도 다 클로저로 침.
