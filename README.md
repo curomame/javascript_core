@@ -944,3 +944,102 @@ outer에서 inner함수를 반환하는 것 자체가, 언젠가 내부 함수�
 
 하지만 여기서도 외부전달이 무조건 return 만을 의미하는 것은 아님
 setinterval 혹은 addeventlistener처럼 handler 함수 내부에서 지역변수를 참조하도록 하는 그런것도 다 클로저로 침.
+
+5.2 클로저와 메모리 관리
+클로저는 객체 지향과 함수형 모두를 아우름.
+메모리 누수 때문에 이를 지양해야한다는 사람도 있지만 이는 본질적인 특징일 뿐임.
+(아무래도 컨텍스트 종료 후에도 변수가 저장된 공간이 gc로 가지 않으니 메모리 낭비라고 말하는듯)
+최근 js에서는 이는 의도대로 설계한 메모리 소모의 범주에 든다.
+
+그렇다면 혹시 이 메모리를 제거하려면 어떻게 해야할까?
+참조 카운트를 0으로 만들면 gc로 들어가서 소모된 메모리가 회수될 것이다.
+이를 0으로 만들기 위해서는 식별자에 참조형이 아닌 기본형 데이터(보통 null of undefined)를 할당하면 된다.
+
+1.return 에 의한 클로저의 메모리 해제
+var outer = {function () {
+var a = 1;
+var inner = function () {
+return ++a;
+};
+return inner;
+})();
+console.log(outer());
+console.log(outer());
+outer = null; // null로 참조를 끊어버리는 것
+
+2)setInterval에 의한 클로저의 메모리 해제
+(function () {
+var a = 0;
+var intervalId = null;
+var inner = function () {
+if(++a >= 10){
+clearInterval(intervalId);
+inner = null; // 함수가 실행되고 나면 함수의 참조를 끊어버림
+}
+console.log(a);
+};
+intervalId = setInterval(inner, 1000);
+})();
+
+3)eventListener에 의한 클로저의 메모리 해제
+button.removeEvnetListener('click',clickHandler);
+clickHandler = null; // 이렇게 끊어버리긔
+
+5.3 클로저 활용 사례
+
+이해는 했는데 어따쓰냥
+
+5.3.1 콜백 함수 내부에서 외부 데이터를 사용하고자 할 때
+
+5.3.2 접근 권한 제어(정보 은닉)
+어떤 모듈의 내부 로직에 대해 외부로의 노출을 최소화해서, 모듈간의 결합도를 낮추고 유연성을 높이고자 하는 현대 프로그래밍 언어의 중요한 개념
+흔히 접근 권한에는 public, private, protected 가 있음.
+return을 활용해서 선태걱으로 외부 스코프에서 함수 내부의 변수들 중 선택적으로 일부 변수에 대한 접근 권한을 부여할 수 있음.
+
+개념적으로 전역 객체에 대해 outer함수는 참조가능하지만 그 내부에 있는 inner를 보지는 못하는 것임
+그래서 내부에서 return을 통해 외부에 정보를 제공하는 유일한 방법인것임.
+
+즉 외부에 제공하는 정보들을 모아서 return 하고, 그렇지 않은 정보는 return하지 않는것으로 접근 권한 제어가 가능한 것임.
+return한 변수들은 public // 그렇지 않은 변수들은 private
+
+만약 자동차 게임같은거 만들면 웹에서 객체 자동차를 생성하면서 이런저런 것들 할수 있음.
+근데 연료량이라던지 연비라던지 마음대로 변수에 접근해서 변경해버릴 수가 있는것임.
+그럴때 클로저를 활용하는 것.
+즉 자동차를 객체가 아닌 함수로 만들고, 필요한 멤버만 return 하는 것
+
+get이랑 set같은것들을 사용하면 진짜 내가 내보내기 원하는 녀석들만 내보낼수있다.
+
+return {
+get moved () {
+return moved;
+},
+run : function(){
+var km = Math.ceil(Math.random() * 6);
+var wasteFuel = km / power;
+if(fuel < wasteFeul) {
+console.log('이동불가');
+return 
+} 
+fuel -= wasteFuel;
+moved += km;
+console.log(km + 'km 이동 ( 총' + ~~~' + fuel);
+
+var car = createCar()
+이렇게 자동차 불러오고
+get으로 moved만 리턴하기 때문에, fuel power같은 것에 함부로 접근하는 것이 불가능함.
+
+하지만 여전히 run method를 덮어쓰는건 가능함.
+
+
+var public Members = {}
+Object.freeze(publicMembers);
+return publicMembers;
+
+이런 식으로 하면 외부에서 바꾸지 못함.
+
+클로저 결국 쓰면 맘대로 못바꾸니까 더 안전하군요
+
+즉 클로저를 활용해 접근권한을 제어하는 방법
+1.함수에서 지역 변수 및 내부함수 등을  생성한다.
+2.외부에 접근권한을 주고자 하는 대상들로 구성된 참조형 데이터(대상이 여럿일때는 객체 또는 배열, 하나일때는 함수)를 return한다.
+=> return한 변수들은 공개 멤버가 되고, 그렇지 않은 변수들은 비공개 멤버가 됨.
