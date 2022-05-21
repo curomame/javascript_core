@@ -1043,3 +1043,63 @@ return publicMembers;
 1.함수에서 지역 변수 및 내부함수 등을  생성한다.
 2.외부에 접근권한을 주고자 하는 대상들로 구성된 참조형 데이터(대상이 여럿일때는 객체 또는 배열, 하나일때는 함수)를 return한다.
 => return한 변수들은 공개 멤버가 되고, 그렇지 않은 변수들은 비공개 멤버가 됨.
+
+5.3.3 부분 적용 함수
+n개의 인자를 받는 함수에 미리 m개의 인자만 넘겨 기억시켰다가, 나중에 (n-m)개의 인자를 넘기면
+비로소 원래 함수의 결과를 얻을 수 있게끔 하는 함수.
+즉 this binding인것ㅇ미
+
+
+var add = function () {더해서 리턴하는 식}
+
+var addPartial = add.bind(null,1,2,3,4,5);
+addPartial(6,7,8,9,10) => 55
+
+근데 위에는 this의 값을 변경할 수 밖에 없기 때문에 메서드에서 사용은 힘듦
+
+var partial = function () { // add 1 2 3 4 5
+var orgArgs = arguments; // add 1 2 3 4 5
+var func = orgArgs[0]; // 왜냐 밑에 addpartial을 정의하는 부분에서 add함수를 첨음에 추가해줬기 때문임.
+if( 함수라면 throw new Error)
+return () {
+var partialArgs = Array.prototype.slice.call(originalParialArgs,1)  // 1 2 3 4 5 
+var restArgs = Array.prototype.slice.call(arguments); // add 1 2 3 4 5
+return func.apply(this, partialArgs.concat(resstArgs)); // 나머지 인자들을 받아 이들을 한데 모아 원본 함수를 호출 ???
+}
+
+var add = function () {
+대충 아규먼츠 들어오면 더하는 내용}
+
+var addPartial = partial(add,1,2,3,4,5);
+addPartial(6,7,8,9,10) // 55
+
+원하는 자리에 인자 넣기
+
+Object.defineProperty(window, '-', {
+value : 'EMPTY_SPACE',
+writable:false,
+configurable:false,
+enumerable:false,})
+
+var partial2 = function () {
+var originalPartialArgs = arguments;
+var func = origi~~[0]
+함수아니면 에러던지기
+
+return function (){
+var partialArgs = Array.prototype.slice.call(originalParialArgs,1) 
+var restArgs = Array.prototype.slice.call(arguments);
+for(var i =0l i< partialArgs.length; i++){
+if(partialArgs[i] === _) {
+partialArgs[i] = restArgs.shift()//앞에서부터 인자 빼서 전달}}
+
+return func.apply(this, partialArgs.concat(restArgs))
+
+return func.apply(this, partialArgs.concat(resstArgs));
+
+
+var addPartial = partial(add,1,2,_,4,_); // 빈곳에 맞춰서 수가 들어감
+addPartial(3,5) 
+
+이부분 어려워서 여기까지만 학습하고 다시 복습 진행할예정
+
