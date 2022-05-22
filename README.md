@@ -1101,5 +1101,5 @@ return func.apply(this, partialArgs.concat(resstArgs));
 var addPartial = partial(add,1,2,_,4,_); // 빈곳에 맞춰서 수가 들어감
 addPartial(3,5) 
 
-이부분 어려워서 여기까지만 학습하고 다시 복습 진행할예정
-
+디바운스 함수로 구현
+기타내용 복습 -> 기록x
