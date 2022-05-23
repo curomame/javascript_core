@@ -1101,5 +1101,63 @@ return func.apply(this, partialArgs.concat(resstArgs));
 var addPartial = partial(add,1,2,_,4,_); // 빈곳에 맞춰서 수가 들어감
 addPartial(3,5) 
 
-디바운스 함수로 구현
-기타내용 복습 -> 기록x
+
+디바운스 - 짧은 시간동안 동일한 이벤트가 많이 발생할 경우 이를 전부 처리 하지 않고, 처음 또는 마지막에 발생한 이벤트에 대해서 하넌만 처리하는 것
+scroll, wheel, mousemove, resize등에 적용ㅎ가ㅣ 좋음.
+
+var debounce = function (eventName, func, wait){
+var timeoutId= null; 
+return function (event){
+var = self = this; //this를 별도의 변수에 담음
+console.log(evnetName, 'event발생');
+clearTimeout(timeoutId); //대기 큐 초기화
+thimeoutId = setTimeout(func.bind(self,event), wait);}; //wait로 시간 지연시키고 원래 함수 호출
+
+var moveHandler = function (e) {
+console.log('move 이벤트 처리');}
+
+var wheelHandler = function (e) {
+console.log('wheel 이베트 처리');}
+
+document.body.addEventListener('mousemove', debounce('move', moveHandler,500));
+document.body.addEventListener('mouswheel', debounce('move', moveWheel,500));
+
+
+wait시간 내에 발생하는 한 마지막에 발생한 이벤틈나 초기화되지 않고 무사히 실행
+
+//참고
+ES6에서는 _ 비워놓음 말고 Symbol.for을 활용하면 좋은데 ?
+Symbol.for 메서드는 전역 심볼공간에 인자로 넘어온 문자열 이미 있으면, 해당값 참조
+없으면 새로 만들기
+
+for(var i=0; i< partialArgs.length; i++){
+if(partialArgs[i] === Symbol.for('EMPTY_SPACE')){
+partialArgs[i] = restArgs.shift();}}
+
+…
+
+var _ = Symbol.for('EMPTY_SPACE);
+
+5.3.4 커링 함수
+커링 함수란 여러개의 인자를 받는 함수를 하나의 인자만 받는 함수로 나눠서, 순차적 호출 될수있도록 체인 혀태로 구성한것.
+앞서 본 부분 적용 함수와 비슷하지만, 커링은 한번에 하나의 인자만 받는것을 원칙으로 하며,
+중간 과정상의 함수를 실행한 결과는 그다음 인자를 받기 위해 대기 할 뿐, 마지막 인자가 전달되기 전까지 원본함수 실행 x
+(부분적용함수는 매번 원본 함수가 실행됨)
+
+var curry = function ( func){
+return function(a){
+return (b){
+return func(a,b);}}}
+
+var getMaxWith10 = curry(Math.max)(10);
+console.log(getMaxWith10(8))//10
+console.log(getMaxWith10(25))//25
+
+이런식으로 작동됨
+따라서 커링함수는 필요한 상황에 직접 만들어 쓰기 용이.
+마지막에만 리턴해주면 되는데 받아들이는게 너무 많아지면 콜백지옥처럼 왕왕왕 생김
+그래서 ES6에서는 이를 간단하게 표기할 수 있음
+
+var curry5 = func => a => b => c => d => e => func(a,b,c,d,e);
+화살표 순서에 따라 함수에 값을 차례로 넘겨주면 마지막에 func가 호출
+데이터 쌓여있다가 마지막 리턴해야 gc로 이동
