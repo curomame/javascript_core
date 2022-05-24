@@ -1161,3 +1161,24 @@ console.log(getMaxWith10(25))//25
 var curry5 = func => a => b => c => d => e => func(a,b,c,d,e);
 화살표 순서에 따라 함수에 값을 차례로 넘겨주면 마지막에 func가 호출
 데이터 쌓여있다가 마지막 리턴해야 gc로 이동
+
+커링함수가 유용한 경우는 당장 필요한 정보만 받아서 전달하고 또 필요한 정보다 들어오는식으로 진행될때,
+마지막 인자가 넘어갈때까지 실행을 미룰때이다.
+이를 함수형 프로그래밍에서 지연실행 lazy execution이라 칭함.
+자주 쓰이는 함수의 매개변수가 항상 비슷하고, 일부만 바뀌는 경우에 유용
+
+var getInformation = function (baseUrl){ // 서버에 요청하는 url
+return function(path) { //path값
+return function (id) { //id값
+return fetch(baseUrl + path + '/' + id)}}
+
+또는
+
+var getInfromation = baseUrl => path => id => fetch(baseUrl +path + '/' + id);
+RUDEX 미들웨어같은 경우에도 이러함.
+
+5.4 정리
+클로저란 어떤 함수에서 선언한 변수를 참조하는 내부함수를 외부로 전달할 경우,
+함수의 실행 컨텍스트가 종료된 후에도 해당 변수가 사라지지 않는 현상.
+내부함수를 외부로 전달하는 방법은 return 뿐 아니라 콜백함수로 전달할때도 포함.
+클로저는 본질이 메모리를 계속차지하지, 사용하지 않게 된 경우에는 메모리 관리를 따로 해줘야함.
