@@ -1182,3 +1182,54 @@ RUDEX 미들웨어같은 경우에도 이러함.
 함수의 실행 컨텍스트가 종료된 후에도 해당 변수가 사라지지 않는 현상.
 내부함수를 외부로 전달하는 방법은 return 뿐 아니라 콜백함수로 전달할때도 포함.
 클로저는 본질이 메모리를 계속차지하지, 사용하지 않게 된 경우에는 메모리 관리를 따로 해줘야함.
+
+
+ <br>
+**06.프로토타입**
+<br>
+
+자바스크립트는 프로토타입 기반 언어임.
+클래스 기반 언어에스는 '상속'을 사용하지만, 프로토타입 기반 언어에서는 어떤 객체를 원형으롯 ㅏㅁ고 이를 복제함으로써 상속과 비슷한 효과를 얻음.
+대부분의 언어가 클래스 기반이라 js가 특이한것임
+
+6.1 프로토타입 개념의 이해
+
+6.1.1 constructor, prototype, instance
+
+var instance = new Constructor();
+-어떤 생성자 함수(constructor)를 new 연산자와 함께 호출하면
+-컨스트럭터에서 정의된 내용을 바탕으로 새로운 인스턴스 생성
+-이때 인스턴스에서는 __proto__라는 프로퍼티 자동 부여
+-이 프로퍼티가 constructor의 prototype이라는 프로퍼티 참조하는것
+
+prototype 과 __proto__가 등장했는데 이 둘의 관계가 프로토 타입의 핵심임.
+prototype은 객체.
+이를 참조하는 __proto__또한 객체.
+prototype 객체 내부에는 인스턴스가 사용할 메서드를 저장하며, 그러면 인스턴스에서도 숨겨진 프로퍼티인 __proto__를 통해 이 메서드들에 접근 할 수 있게 됨.
+
+EX
+const Person = function (name){
+this._name = name;}
+
+Person.prototype.getName = function () {
+return this._name;}
+
+위의 부여로 person의 인스턴스는 __proto__ 프로퍼티를 통해 getName호출 가능
+
+var a = new Person('A');
+a.__proto__.getName(); undefined
+
+사실 위에 this가 잘못 바인딩됨.
+함수를 메서드로서 호출할 때, 메서드명 바로 앞의 객체가 곧 this가 됨.
+즉, a.__proto__가 객체가 되고 이 내부에 프로퍼티가 없어 undefined을 배출
+만약 객체가 있다면 잘 나올것임
+
+그러면 문제를 어케 해결하냐면
+
+a.getName() 이런식으로 함수불러오면 해결됨.
+원래 __proto__가 생략 가능하도록 언어가 만들어졌기 때문에 그냥 그런갑다 해야함.
+
+= new 연산자로 constructor 호출하면 instance만들어지는데, 이 instance의 생략 가능한 프로퍼티인 __proto__는
+= constructor의 prototype을 참조한다!
+
+= 프로퍼티 내부의 함수까지 깊게 복사하지는 못한다.
