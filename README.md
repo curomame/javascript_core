@@ -1233,3 +1233,38 @@ a.getName() 이런식으로 함수불러오면 해결됨.
 = constructor의 prototype을 참조한다!
 
 = 프로퍼티 내부의 함수까지 깊게 복사하지는 못한다.
+
+6.1.2 constructor 프로퍼티
+생성자 함수의 프로퍼티인 prototype 객체 내부에는 constructor라는 프로퍼티가 있음.
+인스턴스 __proto__ 객체 내부에도 마찬가지.
+인스턴스로부터 그 원형이 뭔지 알 수 있는 수단
+
+constructor는 읽기 전용 속성이 부여된 예외적인 경우(기본형 리터럴 변수 - number, string, boolean)을 제외하고는 값 변경 가능
+constructor 변경 하더라도 참조 대상이 변경될 뿐, 이미 만들어진 인스턴스의 원형이 바뀐다거나 데이터 타입이 변하는 것은 아님.
+
+[Constructor]
+[instance].__proto__.constructor
+[instance].constructor
+Objcet.getPrototypeOf([instance]).constructor
+[Constructor].prototype.constructor
+
+위는 모두 동일한 대상을 가리킴
+
+[Constructor].prototype
+[instance].__proto__
+[instance]
+Objcet.getPrototypeOf([instance])
+
+위는 모두 동일한 객체(property)에 접근하는 것임.
+
+6.2 프로토 타입 체인
+
+6.2.1 메서드 오버라이드
+
+prototype 객체를 참조하는 __proto__를 생략하면 인스턴스는 prototype에 정의된 프로퍼티나 메서드를 마치
+자신의 것처럼 사용할 수 있음.
+만약 인스턴스가 동일한 이름의 프로퍼티 또는 메서드를 갖고 있다면?
+
+js가 메서드를 찾는 방식은 가장 가까운 대상인 자신의 프로퍼티를 검색하고, 그다음 가까운 대상인 __proto__를 검색하는 순으로 진행
+__proto__에 있는 메서드는 자신에게 있는 메서드보다 검색순서에 밀려 호출되지 않음.
+동일한 것이 있다면 잠시 원형 위에 얹혀두는 것임.
