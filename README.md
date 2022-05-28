@@ -1274,6 +1274,7 @@ __proto__에 있는 메서드는 자신에게 있는 메서드보다 검색순�
 
 6.2.2 프로토타입 체인
 
+
 객체의 내부 구조
 __proto__내부에는 hasOwnProperty, isPrototypeOf, toLocalString, toString, valueOf등의 메서드 존재
 constructor는 생성자 함수인 Object를 가리킴
@@ -1305,4 +1306,42 @@ Function 생성자 함수 역시 함수이므로, 다시 Function 생성자 함�
 따라서 객체에서만 사용할 메서드는 다른 데이터 타입 처럼 프로토타입 객체 안에 정의할 수 없음.
 객체서만 사용할 메서드를 Objcet.prototype에 정의해버리면 다른것이랑 섞이기(다른 곳에서도 사용 가능) 때문이다.
 
+그러한 이유로 Objcet.prototype에는 어떤 데이터에서도 활용할 수 있는 범용적인 메서드 들만 있음
+ex toString, hasOwnProperty, valueOf, isPrototypeOf 등 모든 변수가 마치 자신의 메서드인것 처럼 호출 가능한것임
 
+하지만 예외적으로 Object.create를 이용하면 Object.prototype 메서드에 접근할 수 없는 경우도 있음.
+Object.create(null)은 __proto__가 없는 객체를 생성함.
+=> 기능의 제약이 있지만 왕창 가벼워짐
+
+6.2.4 다중 프로토타입 체인
+
+자바스크립트의 기본 내장 데이터 타입들은 모두 프로토타입 체인이 1단계(객체) 또는 2단계(나머지)로 끝나는 경우만 있었는데 그 이상도 가능.
+__proto__를 계속연결하면 되는건데, 해당 __proto__가 가리키는 대상, 즉 생성자 함수의 prototype이 연결하고자 하는상위 생성자 함수의 인스턴스를 바라보게끔 해주면 됨
+
+
+var Grade = function () {
+~~ 유사배열 객체
+}
+
+var g = new Grade(100,88)
+
+이후에 Grade.prototype = [];
+
+이렇게 하면 g에서도 배열의 매서드들을 사용할 수 있게되는 것임.
+
+g의 인스턴스 입장에서는 프로토타입 체인따라서 객체 자신이 지니는 멤버, grade의 prototype에 있는 멤버,
+Array.prototype에 있는 멤버, 끝으로 Objcet.prototype에 있는 멤버까지 접근 가능
+
+6.3 정리
+어떤 생성자 함수를 new 연산자와 함께 호출하면 Constructor에서 정의된 내용을 바탕으로 새로운 인스턴스 생성
+이 인스턴스에는 __proto__라는 Constructor의 prototype 프로퍼티를 참조하는 프로퍼티가 자동 부여
+__proto__는 생략 가능한 속성이라서, 인스턴스 메서드를 마치 자신의 메서드 처럼 호출 가능.
+
+constructor 프로퍼티는 인스턴스가 자신의 생성자 함수가 무엇인지 알고자 할때 필요한 수단.
+
+
+전용 매서드들은 static하게 담겨있음.
+
+ <br>
+**07.클래스**
+<br>
