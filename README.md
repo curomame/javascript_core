@@ -1345,3 +1345,100 @@ constructor 프로퍼티는 인스턴스가 자신의 생성자 함수가 무엇
  <br>
 **07.클래스**
 <br>
+
+자바스크립트는 프로토 타입 기반 언어라서 '상속' 개념이 존재하지 않음.
+클래스 기반 언어에와 달라서 헷갈리는 부분!
+벗 ES6부터는 클래스 문법이 추가되서 비슷하게나마 구현이 가능한것임
+
+7.1 클래스와 인스턴스 개념의 이해
+
+클래스 의미 일반적인 의미와 비슷함.
+클래스의 속성을 지닌 실존하는 개체를 일컫어 인스턴스라 지칭
+
+현실세계에서는 하나의 개체에 여러개 클래스가 걸리겠지만,
+컴퓨터는 반대로 여러가지 클래스가 정의된 상태에서
+하나의 클래스만을 바탕으로 인스턴스를 만들수 있는 것임.
+
+인스턴스에 다양한 클래스 걸 순 있지만, 모두 인스턴스 입장에서 직계존속임
+결국 인스턴스 생성할 때 호출할 수 있는 클래스는 오직 하나뿐.
+
+프로그래밍 언어에서의 클래스는 사용하기 따라 추상적 또는 구체적 개체가 될수 있음.
+
+7.2 자바스크립트의 클래스
+생성자 함수 Array를 new 연산자와 함께 호출하면 인스턴스가 생성.
+이때 Array를 일종의 클래스라고 하면, 이 안의 prototype 객체 내부 요소들이 인스턴스에 '상속'된다고 봐야함.
+엄밀히 말하면 앞에서 배운 프로토타입 체이닝에 의한 참조이지만, 결과적으로는 비슷함.
+
+여기 상속되는지 안되는지에 따라서 static과 instance 멤버로 나뉨.
+여느 클래스 기반 언어와 달리, 자바스크립트에서는 인스턴스에 직접 메서드를 정의할 수 있어서,
+이를 프로토 타입매서드라고도 부를수 있음.
+
+일반적인 사용 방식, 즉 구체적인 인스턴스가 사용할 메서드를 정의한 틀 의 역할을 담당할때는 이 클래스는 추상적이지만,
+클래스 자체를 this로 해서 직접 접근해야만 하는 스태틱 메서드를 호출할 때의 클래스는 그 자체가 하나의 개체로서 취급
+
+7.3 클래스 상속
+
+7.3.1 기본 구현
+
+ES5까지는 클래스 문법 없어서 아래와 같이 구현함.
+
+var Grade = function () {
+var args = Array.prototype.slice.call(arguments);
+for(var i=0 ; i<args.length; i++){
+this[i] = args[i];}
+this.length = args.length;}
+
+Grade.prototype = [];
+var g = new Grade(10,90)
+
+이렇게 프로토 타입 체이닝을 잘 구현했다.
+하지만 여기서 subclass와 super클래스가 구분되는것은 아님.
+length가 configurable(삭제가능)하다는 것과, Grade.prototype에 빈 배열을 참조시킨것이 그러한 점임
+
+상위 클래스의 인스턴스를 부여하는 것만으로도 기본적인 메서드 상속이 가능하지만,
+체이닝에 따른 다양한 문제점이 있어 곧바로 이렇게 사용하지는 않는다.
+
+7.3.2 클래스가 구체적인 데이터를 지니지 않게 하는 방법
+즉 추상화를 의미
+가장 쉬운 방법은, 우선 만들고 나서 프로퍼티들을 일일이 지우고 더는 새로운 프로퍼티를 추가할 수 없게끔 만든는 것임
+약간 gc에 넣는 너낌
+
+delete Square.prototype.width;
+delete Square.prototype.height;
+Objcet.freeze(Square.prototype);
+
+이런식으로 그래서 이를 수행할 함수도 만들어 줌.
+
+var extendClass1 = function (SuperClass, SubClass, SubMethod){
+subclass.prototype = new SuperClass();
+for(var prop in SubClass.prototype){
+if(SubClass.prototype.hasOwnProperty(prop)){
+delete SubClass.prototype[prop];}}
+
+if(SubMethods){
+for( var method in subMethods){
+SubClass.prototype[method] = subMethods[method];}}
+
+Object.freeze(SubClass.prototype);
+return SubClass;}
+
+var Square = extendClass1(Rectangle, function (width){
+Rectangle.call(this.width.width);})
+
+두번째 방법은 빈 생성자 함수(Brige)를 만들어서 잇는 방법
+
+var bridge = function () {};
+Bridge.prototype = Rectangle.prototype;
+Square.prototype = new Bridge();
+Objcet.freeze(Square.prototype);
+
+이것도 함수로 만들어서 범용성 높여 사용 가능.
+
+ES5에서는 아래와 같은 방법으로 사용
+Square.prototype = Object.create(Rectangle.prototype); => 전장에서 배운 create. proto 없어지게끔 가볍게
+Objcet.freeze(Square.prototype);
+
+7.3.3 constructor 복구하기
+위 세가지 모든 방법으로 기본적인 상속 성공했지만 SubClass의 인스턴스의 constructor는 여전히
+Superclass를 가리킴
+
