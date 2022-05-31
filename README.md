@@ -1442,3 +1442,55 @@ Objcet.freeze(Square.prototype);
 위 세가지 모든 방법으로 기본적인 상속 성공했지만 SubClass의 인스턴스의 constructor는 여전히
 Superclass를 가리킴
 
+엄밀히 말하면 subClass 인스턴스에는 constructor 가 없고, SubClassprototype에도 없는 상태
+프로토타입 체인 상 가장 먼저 등장하는 SuperClass.prototype의 constructor에서 가리키는 대상
+즉 superclass가 출력될 뿐임
+그래서 원래의 subclass 의 constructor가 원래 subclass바라보도록 해주면 됨.
+
+subclass의 프로토타입[prop] 지우고 새로이 메소드를 부여하는 방식
+만약 브릿지를 한 경우라면, 브릿지의 컨스트럭터가 슈퍼 클래스 바라보도록 하는 코드도 추가해야함
+
+7.3.4 상위 클래스에의 접근 수단 제공
+
+우선 인자가 비어있을 경우 superclass 생성자 함수에 접근하는 것으로 간주
+this가 달라지는 것을 막기 위해 클로저 활용
+superclass의 프로타티입 내부에 propName에 해당하는 값이 함수가 아닌 경우
+해당값을 그대로 반환하고, 함수인경우 마찬가디로 클로저를 활용해 매서드로서 접근
+
+7.4 ES6의 클래스 및 클래스 상속
+
+var ES6 = class {
+constructor(name){
+this.name = name;}
+static staticMethod () {
+return this.name + 'staticMethod';}
+method(){ return this.name+'method'}
+
+var es6instance = new ES6('es6')
+
+클래스 상속
+
+const Rectangle = class {
+consturctor (width, height){
+this.width = width;
+this.height = height;}
+
+getArea(){
+return this.width * this.height;}}
+
+const Square = class extends Rectangle{
+constructor (width){
+super(width,width)}
+getArea(){
+console.log('size is :', super.getArea()}}};
+
+7.5 정리
+자바스크립트는 프로토타입 기반이라 이 개념자체가 비슷하게 하는것 뿐임
+클래스는 어떤 사물의 공통 속성을 모아 정의한 추상적 개념이고
+인스턴스는 클래스의 속성을 지니는 구체적인 사례임
+상위 클래스(superclass)의 조건을 충족하면서
+더욱 구체적인 조건이 추가된 것을 하위클래스(subclass)라고 함
+
+클래스의 프로토타입 내부에 정의된 매서드를 프로토타입 매서드라고 하며
+이들은 인스턴스가 마치 자신의 것처럼 호출
+스태틱 매서드는 클래스에의해서만 호출 가능
